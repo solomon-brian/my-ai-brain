@@ -1,0 +1,39 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# Dependencies
+/node_modules
+/.pnp
+.pnp.js
+.yarn/install-state.gz
+
+# Local Environment Variables
+# Exclude all .env files and only allow .env.example
+.env.*
+!.env.example
+
+# We are using .env.local, which is covered by .env.*
+# If you wanted to commit a template, you'd create a .env.example file
+
+# Next.js build output
+/.next/
+/out/
+
+# Production build files
+/build
+
+# Static exports
+/export
+
+# Misc
+.DS_Store
+*.pem
+
+# Vercel
+.vercel
+
+# Turborepo
+.turbo
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
