@@ -66,35 +66,36 @@ export default function Home() {
         }
     };
 
+    // --- SYNTHESIS: The professional light mode infused with the original, soulful copy. ---
     return (
-        // A pure white, stark background. No softness.
-        <div className="min-h-screen bg-white text-black flex flex-col items-center p-4 sm:p-6 font-mono">
+        <div className="min-h-screen bg-gray-50 flex flex-col items-center p-4 sm:p-6 font-sans">
             <div className="w-full max-w-2xl mx-auto">
                 <header className="text-center mb-8">
-                    <h1 className="text-4xl sm:text-5xl font-bold mb-2">My AI Brain</h1>
-                    <p className="text-lg text-gray-600">A Clarity Engine.</p>
+                    <h1 className="text-4xl sm:text-5xl font-black text-gray-900 mb-2">My AI Brain</h1>
+                    {/* The human, aspirational tagline is restored. */}
+                    <p className="text-lg text-gray-500">Your second brain. Powered by AI.</p>
                 </header>
 
-                {/* The Instrument: A hard, defined border. No shadows. This is a tool, not a decoration. */}
-                <div className="bg-white border-2 border-black rounded-lg p-4 sm:p-6">
+                <div className="bg-white border border-gray-200 rounded-xl p-4 sm:p-6 shadow-sm">
                     <div className="flex justify-center gap-2 mb-6">
                         <button
-                            className={`px-4 py-2 rounded text-sm sm:text-base font-bold transition-all duration-150 border-2 border-black ${mode === "note" ? "bg-black text-white" : "bg-white text-black hover:bg-gray-200"}`}
+                            className={`px-4 py-2 rounded-lg text-sm sm:text-base font-semibold transition-all duration-200 ${mode === "note" ? "bg-blue-600 text-white shadow-sm" : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-300"}`}
                             onClick={() => setMode("note")}>
-                            LOG_NOTE
+                            📝 Notes
                         </button>
                         <button
-                            className={`px-4 py-2 rounded text-sm sm:text-base font-bold transition-all duration-150 border-2 border-black ${mode === "ask" ? "bg-black text-white" : "bg-white text-black hover:bg-gray-200"}`}
+                            className={`px-4 py-2 rounded-lg text-sm sm:text-base font-semibold transition-all duration-200 ${mode === "ask" ? "bg-green-600 text-white shadow-sm" : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-300"}`}
                             onClick={() => setMode("ask")}>
-                            QUERY_BRAIN
+                            🧠 Ask AI
                         </button>
                     </div>
 
                     <div className="flex mb-4">
                         <input
                             type="text"
-                            className="flex-1 p-3 rounded-l bg-white text-black border-2 border-r-0 border-black focus:outline-none"
-                            placeholder={mode === 'note' ? "Input data..." : "Enter query..."}
+                            className="flex-1 p-3 rounded-l-lg bg-gray-100 text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            // The iconic placeholder is restored.
+                            placeholder={mode === 'note' ? "Capture a thought..." : "Ask your brain..."}
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
                             onKeyPress={handleKeyPress}
@@ -103,24 +104,30 @@ export default function Home() {
                         <button
                             onClick={mode === 'note' ? addNote : askAI}
                             disabled={isLoading}
-                            className={`px-4 py-2 rounded-r font-bold text-white transition-colors flex items-center justify-center border-2 border-l-0 border-black ${mode === 'note' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-green-600 hover:bg-green-700'} disabled:bg-gray-500`}>
-                            {isLoading ? "..." : "EXECUTE"}
+                            className={`px-4 py-2 rounded-r-lg font-bold text-white transition-colors flex items-center justify-center ${mode === 'note' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-green-600 hover:bg-green-700'} disabled:bg-gray-400 disabled:cursor-not-allowed`}>
+                            {isLoading ? (
+                                <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                            ) : (mode === 'note' ? 'Save' : 'Ask')}
                         </button>
                     </div>
 
                     {mode === "note" && (
                         <div>
-                            <div className="flex justify-between items-center mb-2 border-b-2 border-black pb-2">
-                                <h2 className="text-lg font-bold">DATA_LOG</h2>
+                            <div className="flex justify-between items-center mb-2">
+                                <h2 className="text-xl font-bold text-gray-800">Notes</h2>
                                 {notes.length > 0 && (
-                                    <button onClick={clearNotes} className="text-xs text-red-600 hover:underline font-bold">PURGE_LOG</button>
+                                    <button onClick={clearNotes} className="text-xs text-red-500 hover:text-red-700 font-semibold">Clear All</button>
                                 )}
                             </div>
-                            <div className="space-y-2 max-h-60 overflow-y-auto pr-2 pt-2">
+                            <div className="space-y-2 max-h-60 overflow-y-auto pr-2 border-t border-gray-200 pt-4">
                                 {notes.length > 0 ? notes.slice().reverse().map((n, i) => (
-                                    <div key={i} className="p-2 border border-gray-300 rounded-sm text-sm">{n.text}</div>
+                                    <div key={i} className="p-3 bg-gray-100 rounded-lg text-sm text-gray-700">{n.text}</div>
                                 )) : (
-                                    <p className="text-center text-gray-500 p-4">LOG EMPTY. AWAITING DATA INPUT.</p>
+                                    // The perfect empty state is restored.
+                                    <p className="text-center text-gray-400 p-4">Your brain is empty. Start capturing thoughts.</p>
                                 )}
                             </div>
                         </div>
@@ -128,10 +135,10 @@ export default function Home() {
 
                     {mode === "ask" && (
                         <div>
-                            <h2 className="text-lg font-bold border-b-2 border-black pb-2 mb-2">AI_RESPONSE</h2>
-                            <pre className="p-4 bg-black text-green-400 rounded text-sm whitespace-pre-wrap font-mono min-h-[100px]">
-                                {aiResponse || "> Awaiting query..."}
-                            </pre>
+                            <h2 className="text-xl font-bold text-gray-800 mb-2">AI Analysis</h2>
+                            <div className="p-4 bg-gray-900 text-gray-200 rounded-lg text-sm whitespace-pre-wrap font-mono min-h-[100px] border border-gray-700 shadow-inner">
+                                {aiResponse || "The AI's response will appear here."}
+                            </div>
                         </div>
                     )}
                 </div>
