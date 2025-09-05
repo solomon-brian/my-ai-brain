@@ -86,7 +86,7 @@ export default function Home() {
                         <button
                             className={`px-4 py-2 rounded-md text-sm sm:text-base font-bold transition-colors ${mode === "note" ? "bg-blue-600 text-white" : "bg-gray-800 text-gray-300 hover:bg-gray-700"}`}
                             onClick={() => setMode("note")}>
-                            📝 Capture Notes
+                            📝 Notes
                         </button>
                         <button
                             className={`px-4 py-2 rounded-md text-sm sm:text-base font-bold transition-colors ${mode === "ask" ? "bg-green-600 text-white" : "bg-gray-800 text-gray-300 hover:bg-gray-700"}`}
@@ -99,7 +99,7 @@ export default function Home() {
                         <input
                             type="text"
                             className="flex-1 p-3 rounded-l-md bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            placeholder={mode === 'note' ? "Capture a thought..." : "Ask a question based on your notes..."}
+                            placeholder={mode === 'note' ? "Capture a thought..." : "Ask your brain..."}
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
                             onKeyPress={handleKeyPress}
