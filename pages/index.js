@@ -66,37 +66,35 @@ export default function Home() {
         }
     };
 
-    // --- UI ENGINEERING STARTS HERE ---
     return (
-        // A soft, off-white background for visual comfort.
-        <div className="min-h-screen bg-gray-50 flex flex-col items-center p-4 sm:p-6 font-sans">
+        // A pure white, stark background. No softness.
+        <div className="min-h-screen bg-white text-black flex flex-col items-center p-4 sm:p-6 font-mono">
             <div className="w-full max-w-2xl mx-auto">
                 <header className="text-center mb-8">
-                    <h1 className="text-4xl sm:text-5xl font-black text-gray-900 mb-2">My AI Brain</h1>
-                    <p className="text-lg text-gray-500">Your second brain. Powered by AI.</p>
+                    <h1 className="text-4xl sm:text-5xl font-bold mb-2">My AI Brain</h1>
+                    <p className="text-lg text-gray-600">A Clarity Engine.</p>
                 </header>
 
-                {/* The main card: pure white with a refined shadow and border for a clean, professional look. */}
-                <div className="bg-white border border-gray-200 rounded-xl p-4 sm:p-6 shadow-sm">
+                {/* The Instrument: A hard, defined border. No shadows. This is a tool, not a decoration. */}
+                <div className="bg-white border-2 border-black rounded-lg p-4 sm:p-6">
                     <div className="flex justify-center gap-2 mb-6">
                         <button
-                            className={`px-4 py-2 rounded-lg text-sm sm:text-base font-semibold transition-all duration-200 ${mode === "note" ? "bg-blue-600 text-white shadow-sm" : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-300"}`}
+                            className={`px-4 py-2 rounded text-sm sm:text-base font-bold transition-all duration-150 border-2 border-black ${mode === "note" ? "bg-black text-white" : "bg-white text-black hover:bg-gray-200"}`}
                             onClick={() => setMode("note")}>
-                            📝 Capture Note
+                            LOG_NOTE
                         </button>
                         <button
-                            className={`px-4 py-2 rounded-lg text-sm sm:text-base font-semibold transition-all duration-200 ${mode === "ask" ? "bg-green-600 text-white shadow-sm" : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-300"}`}
+                            className={`px-4 py-2 rounded text-sm sm:text-base font-bold transition-all duration-150 border-2 border-black ${mode === "ask" ? "bg-black text-white" : "bg-white text-black hover:bg-gray-200"}`}
                             onClick={() => setMode("ask")}>
-                            🧠 Ask AI
+                            QUERY_BRAIN
                         </button>
                     </div>
 
                     <div className="flex mb-4">
                         <input
                             type="text"
-                            // A lighter input background with a clear focus ring for better usability.
-                            className="flex-1 p-3 rounded-l-lg bg-gray-100 text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            placeholder={mode === 'note' ? "Capture a thought..." : "Ask your brain..."}
+                            className="flex-1 p-3 rounded-l bg-white text-black border-2 border-r-0 border-black focus:outline-none"
+                            placeholder={mode === 'note' ? "Input data..." : "Enter query..."}
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
                             onKeyPress={handleKeyPress}
@@ -105,30 +103,24 @@ export default function Home() {
                         <button
                             onClick={mode === 'note' ? addNote : askAI}
                             disabled={isLoading}
-                            className={`px-4 py-2 rounded-r-lg font-bold text-white transition-colors flex items-center justify-center ${mode === 'note' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-green-600 hover:bg-green-700'} disabled:bg-gray-400 disabled:cursor-not-allowed`}>
-                            {isLoading ? (
-                                <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                            ) : (mode === 'note' ? 'Save' : 'Ask')}
+                            className={`px-4 py-2 rounded-r font-bold text-white transition-colors flex items-center justify-center border-2 border-l-0 border-black ${mode === 'note' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-green-600 hover:bg-green-700'} disabled:bg-gray-500`}>
+                            {isLoading ? "..." : "EXECUTE"}
                         </button>
                     </div>
 
                     {mode === "note" && (
                         <div>
-                            <div className="flex justify-between items-center mb-2">
-                                <h2 className="text-xl font-bold text-gray-800">Notes</h2>
+                            <div className="flex justify-between items-center mb-2 border-b-2 border-black pb-2">
+                                <h2 className="text-lg font-bold">DATA_LOG</h2>
                                 {notes.length > 0 && (
-                                    <button onClick={clearNotes} className="text-xs text-red-500 hover:text-red-700 font-semibold">Clear All</button>
+                                    <button onClick={clearNotes} className="text-xs text-red-600 hover:underline font-bold">PURGE_LOG</button>
                                 )}
                             </div>
-                            {/* A subtle border separates the notes from the rest of the UI. */}
-                            <div className="space-y-2 max-h-60 overflow-y-auto pr-2 border-t border-gray-200 pt-4">
+                            <div className="space-y-2 max-h-60 overflow-y-auto pr-2 pt-2">
                                 {notes.length > 0 ? notes.slice().reverse().map((n, i) => (
-                                    <div key={i} className="p-3 bg-gray-100 rounded-lg text-sm text-gray-700">{n.text}</div>
+                                    <div key={i} className="p-2 border border-gray-300 rounded-sm text-sm">{n.text}</div>
                                 )) : (
-                                    <p className="text-center text-gray-400 p-4">Your brain is empty. Start capturing thoughts.</p>
+                                    <p className="text-center text-gray-500 p-4">LOG EMPTY. AWAITING DATA INPUT.</p>
                                 )}
                             </div>
                         </div>
@@ -136,11 +128,10 @@ export default function Home() {
 
                     {mode === "ask" && (
                         <div>
-                            <h2 className="text-xl font-bold text-gray-800 mb-2">AI Analysis</h2>
-                            {/* The Terminal: Remains dark, a core branding element. Now it feels like a premium, integrated component. */}
-                            <div className="p-4 bg-gray-900 text-gray-200 rounded-lg text-sm whitespace-pre-wrap font-mono min-h-[100px] border border-gray-700 shadow-inner">
-                                {aiResponse || "The AI's response will appear here."}
-                            </div>
+                            <h2 className="text-lg font-bold border-b-2 border-black pb-2 mb-2">AI_RESPONSE</h2>
+                            <pre className="p-4 bg-black text-green-400 rounded text-sm whitespace-pre-wrap font-mono min-h-[100px]">
+                                {aiResponse || "> Awaiting query..."}
+                            </pre>
                         </div>
                     )}
                 </div>
