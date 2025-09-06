@@ -6,14 +6,12 @@ const UserIcon = () => ( <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none
 export default function Home() {
     const [notes, setNotes] = useState([]);
     const [messages, setMessages] = useState([]);
-    // --- THE FIX IS HERE ---
     const [input, setInput] = useState("");
     const [mode, setMode] = useState("analysis");
     const [isLoading, setIsLoading] = useState(false);
     const [theme, setTheme] = useState("light");
     const messagesEndRef = useRef(null);
 
-    // --- Core Logic ---
     useEffect(() => {
         const savedTheme = localStorage.getItem("myaibrain_theme") || "light";
         setTheme(savedTheme);
@@ -46,20 +44,30 @@ export default function Home() {
     const handleSendMessage = async () => {
         if (!input.trim() || isLoading) return;
         const userMessage = { role: 'user', content: input };
-        setMessages(prev => [...prev, userMessage]);
-        const currentInput = input;
+        const newMessages = [...messages, userMessage];
+        setMessages(newMessages);
         setInput("");
         setIsLoading(true);
 
-        const context = notes.map(n => n.text).join("\n");
-        const prompt = `Context:\n${context}\n\nQuestion: ${currentInput}`;
+        const notesContext = notes.map(n => n.text).join("\n");
         
         try {
-            const response = await fetch('/api/groq', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prompt }) });
-            if (!response.ok) throw new Error((await response.json()).error || "Server error");
+            // --- THE CONNECTION IS REWIRED HERE ---
+            const response = await fetch('/api/chat', { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' }, 
+                body: JSON.stringify({ messages: newMessages, notesContext: notesContext }) 
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || "Server error");
+            }
+            
             const data = await response.json();
-            const aiMessage = { role: 'assistant', content: data.result };
+            const aiMessage = { role: 'assistant', content: data.reply };
             setMessages(prev => [...prev, aiMessage]);
+
         } catch (error) {
             setMessages(prev => [...prev, { role: 'assistant', content: `Error: ${error.message}` }]);
         } finally {
@@ -84,7 +92,6 @@ export default function Home() {
             </header>
 
             <main className="flex-1 pt-[81px] overflow-hidden">
-                {/* Unified Input - visible in both modes, but function changes */}
                 <div className={`w-full h-full p-6 ${mode === 'notes' ? 'block' : 'hidden'}`}>
                     <h2 className="text-2xl font-bold mb-4" style={{color: 'var(--text-main)'}}>Notes Log</h2>
                     <textarea className="w-full h-40 p-3 rounded-lg border text-base" style={{backgroundColor: 'var(--surface-bg)', borderColor: 'var(--border-color)', color: 'var(--text-main)'}} placeholder="Capture a new note..." value={input} onChange={e => setInput(e.target.value)}></textarea>
