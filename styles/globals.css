@@ -2,14 +2,42 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Add a subtle scrollbar for a polished look */
-::-webkit-scrollbar {
-  width: 6px;
+/* The Design System, ported from your prototype */
+:root {
+    --bg: #FFFFFF;
+    --text-main: #111111;
+    --text-dim: #606060;
+    --border-color: #E0E0E0;
+    --surface-bg: #F9FAFB;
+    --accent-blue: #007BFF;
+    --accent-green: #28a745;
+    --bot-bubble-bg: #F0F0F0;
+    --user-bubble-bg: #007BFF; /* Using accent blue for user bubble */
+    --header-bg: rgba(255, 255, 255, 0.8);
 }
-::-webkit-scrollbar-track {
-  background: transparent;
+
+body.dark-mode {
+    --bg: #111111;
+    --text-main: #FFFFFF;
+    --text-dim: #999999;
+    --border-color: #333333;
+    --surface-bg: #1a1a1a;
+    --bot-bubble-bg: #222222;
+    --user-bubble-bg: #007BFF;
+    --header-bg: rgba(17, 17, 17, 0.8);
 }
+
+body {
+    background-color: var(--bg);
+    color: var(--text-main);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Scrollbar styling from your prototype */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background-color: #4A5568; /* A neutral gray */
-  border-radius: 20px;
+    background-color: var(--border-color);
+    border-radius: 20px;
+    border: 2px solid var(--bg);
 }
