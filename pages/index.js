@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from "react";
 
-// The complete, functional SVG component
 const BrainIcon = () => (
     <svg className="h-7 w-7" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M6.5 13.5C4.01 13.5 2 15.51 2 18C2 19.82 3.08 21.4 4.7 22.21M17.5 13.5C19.99 13.5 22 15.51 22 18C22 19.82 20.92 21.4 19.3 22.21M12 13V22M12 13C13.66 13 15 11.66 15 10V9C15 6 12 3 12 3C12 3 9 6 9 9V10C9 11.66 10.34 13 12 13ZM12 3C10.5 1.5 8.5 2 7.5 4C6.5 6 8.5 7.5 9 9M12 3C13.5 1.5 15.5 2 16.5 4C17.5 6 15.5 7.5 15 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -16,7 +15,6 @@ export default function Home() {
     const [theme, setTheme] = useState("light");
     const [toast, setToast] = useState({ show: false, message: "" });
 
-    // --- Core Logic ---
     useEffect(() => {
         const savedTheme = localStorage.getItem("myaibrain_theme") || "light";
         setTheme(savedTheme);
@@ -37,21 +35,15 @@ export default function Home() {
         } catch (e) { setNotes([]); }
     }, []);
 
-    useEffect(() => {
-        localStorage.setItem("myaibrain_notes", JSON.stringify(notes));
-    }, [notes]);
+    useEffect(() => { localStorage.setItem("myaibrain_notes", JSON.stringify(notes)); }, [notes]);
 
     const showToast = (message) => {
-        setToast({ show: true, message: "" }); // Reset first
-        setTimeout(() => {
-            setToast({ show: true, message });
-        }, 50);
-        setTimeout(() => setToast({ show: false, message: "" }), 2050); // Show for 2 seconds
+        setToast({ show: true, message: "" });
+        setTimeout(() => { setToast({ show: true, message }); }, 50);
+        setTimeout(() => setToast({ show: false, message: "" }), 2050);
     };
 
-    // FEATURE UPGRADE: Individual Note Deletion
     const deleteNote = (indexToDelete) => {
-        // Since we reverse the array for display, we must calculate the correct index
         const actualIndex = notes.length - 1 - indexToDelete;
         const updatedNotes = notes.filter((_, index) => index !== actualIndex);
         setNotes(updatedNotes);
@@ -65,14 +57,8 @@ export default function Home() {
         showToast("Note Captured.");
     };
 
-    const clearNotes = () => {
-        if (window.confirm("Are you sure?")) {
-            setNotes([]);
-            showToast("Log Cleared.");
-        }
-    };
+    const clearNotes = () => { if (window.confirm("Are you sure?")) { setNotes([]); showToast("Log Cleared."); } };
 
-    // FEATURE UPGRADE: Copy to Clipboard
     const copyToClipboard = () => {
         if (!aiResponse || aiResponse.startsWith("Analyzing...") || aiResponse.startsWith("Error:")) return;
         navigator.clipboard.writeText(aiResponse);
@@ -94,10 +80,10 @@ export default function Home() {
             setAiResponse(`Error: ${error.message}`);
         } finally {
             setIsLoading(false);
+            // We do NOT clear the input in AI mode.
         }
     };
     
-    // The complete, functional keypress handler
     const handleKeyPress = (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
@@ -124,16 +110,12 @@ export default function Home() {
             <main className="flex-1 pt-[81px] overflow-hidden">
                 <div className="w-full max-w-2xl mx-auto h-full flex flex-col">
                     <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded-lg flex justify-center gap-2 my-4">
-                        <button className={`w-full py-2 rounded-md text-sm font-semibold ${mode === "note" ? "bg-white dark:bg-gray-700 shadow-sm" : "text-gray-500 dark:text-gray-400"}`} onClick={() => setMode("note")}>
-                            Notes
-                        </button>
-                        <button className={`w-full py-2 rounded-md text-sm font-semibold ${mode === "ask" ? "bg-white dark:bg-gray-700 shadow-sm" : "text-gray-500 dark:text-gray-400"}`} onClick={() => setMode("ask")}>
-                            Analysis
-                        </button>
+                        <button className={`w-full py-2 rounded-md text-sm font-semibold ${mode === "note" ? "bg-white dark:bg-gray-700 shadow-sm" : "text-gray-500 dark:text-gray-400"}`} onClick={() => setMode("note")}>Notes</button>
+                        <button className={`w-full py-2 rounded-md text-sm font-semibold ${mode === "ask" ? "bg-white dark:bg-gray-700 shadow-sm" : "text-gray-500 dark:text-gray-400"}`} onClick={() => setMode("ask")}>Analysis</button>
                     </div>
                     
                     <div className="flex-1 min-h-0 relative">
-                        {/* Note View with Delete Button */}
+                        {/* Note View */}
                         <div className={`absolute inset-0 transition-opacity duration-300 ${mode === 'note' ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
                             <div className="flex justify-between items-center mb-2 px-1">
                                 <h2 className="text-lg font-bold" style={{color: 'var(--text-main)'}}>Log</h2>
@@ -143,9 +125,7 @@ export default function Home() {
                                 {notes.length > 0 ? notes.slice().reverse().map((n, i) => (
                                     <div key={i} className="group flex items-center justify-between p-3 rounded-lg" style={{backgroundColor: 'var(--surface-bg)'}}>
                                         <p className="text-sm" style={{color: 'var(--text-dim)'}}>{n.text}</p>
-                                        <button onClick={() => deleteNote(i)} className="opacity-0 group-hover:opacity-100 text-red-500 text-xs font-bold transition-opacity">
-                                            X
-                                        </button>
+                                        <button onClick={() => deleteNote(i)} className="opacity-0 group-hover:opacity-100 text-red-500 text-xs font-bold transition-opacity">X</button>
                                     </div>
                                 )) : (
                                      <div className="text-center p-10" style={{color: 'var(--text-dim)'}}><p className="text-lg">Your brain is empty.</p><p className="text-sm">Start capturing thoughts.</p></div>
@@ -153,7 +133,7 @@ export default function Home() {
                             </div>
                         </div>
 
-                        {/* Analysis View with Copy Button */}
+                        {/* Analysis View */}
                         <div className={`absolute inset-0 transition-opacity duration-300 ${mode === 'ask' ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
                              <div className="flex justify-between items-center mb-2 px-1">
                                 <h2 className="text-lg font-bold" style={{color: 'var(--text-main)'}}>AI Response</h2>
@@ -169,7 +149,8 @@ export default function Home() {
                     
                     <div className="py-4">
                          <div className="flex">
-                            <input type="text" className="flex-1 p-3 rounded-l-lg border focus:outline-none focus:ring-2 focus:ring-blue-500" style={{backgroundColor: 'var(--surface-bg)', borderColor: 'var(--border-color)'}} placeholder={mode === 'note' ? "Capture a thought..." : "Ask your brain..."} value={input} onChange={(e) => setInput(e.value)} onKeyPress={handleKeyPress} disabled={isLoading} />
+                            {/* --- THE FIX IS HERE --- */}
+                            <input type="text" className="flex-1 p-3 rounded-l-lg border focus:outline-none focus:ring-2 focus:ring-blue-500" style={{backgroundColor: 'var(--surface-bg)', borderColor: 'var(--border-color)'}} placeholder={mode === 'note' ? "Capture a thought..." : "Ask your brain..."} value={input} onChange={(e) => setInput(e.target.value)} onKeyPress={handleKeyPress} disabled={isLoading} />
                             <button onClick={mode === 'note' ? addNote : askAI} disabled={isLoading} className={`px-4 font-bold text-white rounded-r-lg ${mode === 'note' ? 'bg-blue-600' : 'bg-green-600'} disabled:bg-gray-400`}>
                                 {isLoading ? '...' : 'Send'}
                             </button>
@@ -177,8 +158,7 @@ export default function Home() {
                     </div>
                 </div>
             </main>
-             {/* Toast Notification */}
-            <div className={`fixed bottom-5 bg-gray-900 text-white py-2 px-5 rounded-lg shadow-xl transition-all duration-300 ${toast.show ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5 pointer-events-none'}`}>
+             <div className={`fixed bottom-5 bg-gray-900 text-white py-2 px-5 rounded-lg shadow-xl transition-all duration-300 ${toast.show ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5 pointer-events-none'}`}>
                 {toast.message}
             </div>
         </div>
