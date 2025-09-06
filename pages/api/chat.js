@@ -1,21 +1,41 @@
 import Groq from 'groq-sdk';
 
+// --- The Brain Foundry: A library of personalities ---
+const BRAIN_PERSONAS = {
+    'default': {
+        name: 'My AI Brain',
+        prompt: `You are "My AI Brain," a personal AI assistant. You are direct, logical, and serve as a Clarity Engine for your user. You are the default, general-purpose intelligence.`
+    },
+    'therapist': {
+        name: 'Therapist Brain',
+        prompt: `You are a compassionate, professional therapist AI. Your goal is to listen, provide empathetic reflections, and guide the user through their thoughts and feelings using principles of Cognitive Behavioral Therapy (CBT). You do not give direct advice, but help the user find their own clarity. Maintain a calm, supportive, and non-judgmental tone.`
+    },
+    'business': {
+        name: 'Business Brain',
+        prompt: `You are a ruthless, data-driven business strategist AI. Your sole focus is on growth, efficiency, and market dynamics. Analyze the user's queries through the lens of a CEO. Provide concise, actionable, and unsentimental advice. Use business terminology and frameworks where appropriate.`
+    },
+    'relationship': {
+        name: 'Relationship Brain',
+        prompt: `You are a wise and empathetic relationship coach AI. You understand the complexities of human connection. Your goal is to help the user navigate their relationships with clarity and compassion. Provide balanced perspectives, suggest healthy communication strategies, and focus on emotional intelligence.`
+    },
+};
+
 export default async function handler(req, res) {
-    if (req.method !== 'POST') {
-        return res.status(405).json({ error: 'Method Not Allowed' });
-    }
+    if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' });
 
     try {
         const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
-        const { messages } = req.body;
+        // The front-end now sends which brain to use
+        const { messages, brainId } = req.body;
 
-        if (!messages || messages.length === 0) {
-            return res.status(400).json({ error: 'Messages are required.' });
-        }
+        if (!messages || messages.length === 0) return res.status(400).json({ error: 'Messages are required.' });
+
+        // Select the correct persona, defaulting to the main brain
+        const persona = BRAIN_PERSONAS[brainId] || BRAIN_PERSONAS['default'];
 
         const systemPrompt = {
             role: 'system',
-            content: `You are "My AI Brain," a personal AI assistant. You are direct, logical, and serve as a Clarity Engine for your user.`
+            content: persona.prompt
         };
 
         const chatCompletion = await groq.chat.completions.create({
@@ -24,7 +44,8 @@ export default async function handler(req, res) {
         });
 
         const reply = chatCompletion.choices[0]?.message?.content || 'No response from AI.';
-        return res.status(200).json({ reply });
+        // We also send back which brain responded, for the UI
+        return res.status(200).json({ reply, brainName: persona.name });
 
     } catch (error) {
         console.error('Error in Groq API route:', error);
