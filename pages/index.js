@@ -74,8 +74,9 @@ export default function Home() {
             </aside>
 
             <main className="flex-1 flex flex-col">
-                <header className="flex items-center justify-end p-4">
-                    <button className="px-4 py-2 text-sm font-semibold bg-brand-purple text-white rounded-lg hover:opacity-90">Upgrade your plan</button>
+                {/* --- PURIFICATION: Header is now empty and clean --- */}
+                <header className="flex items-center justify-end p-4 h-[65px]">
+                    {/* Placeholder for future elements if needed */}
                 </header>
 
                 <div className="flex-1 overflow-y-auto">
@@ -89,7 +90,6 @@ export default function Home() {
                         </div>
                     ) : (
                         <div className="space-y-8 max-w-3xl mx-auto p-6">
-                            {/* --- THE FIX IS HERE: Full JSX implementation --- */}
                             {messages.map((msg, i) => (
                                 <div key={i} className="flex items-start gap-4">
                                     <div className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-gray-200 text-gray-600">
@@ -126,15 +126,7 @@ export default function Home() {
                     </footer>
                 )}
 
-                <div className="p-4">
-                     <div className="max-w-3xl mx-auto p-4 bg-gray-800 text-white rounded-lg flex justify-between items-center">
-                         <div>
-                             <p className="font-bold">Unlock more with Plus</p>
-                             <p className="text-sm text-gray-300">Get higher limits, smarter models, and more.</p>
-                         </div>
-                         <button className="bg-black px-4 py-2 rounded-lg font-semibold">Upgrade</button>
-                     </div>
-                </div>
+                {/* --- PURIFICATION: Monetization banner is removed --- */}
             </main>
         </div>
     );
