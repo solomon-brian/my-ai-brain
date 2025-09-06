@@ -5,14 +5,12 @@ const BrainIcon = () => ( <svg className="h-5 w-5" viewBox="0 0 24 24" fill="non
 const UserIcon = () => ( <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 12C14.2091 12 16 10.2091 16 8C16 5.79086 14.2091 4 12 4C9.79086 4 8 5.79086 8 8C8 10.2091 9.79086 12 12 12ZM12 12C18.6667 12 20 16 20 18V20H4V18C4 16 5.33333 12 12 12Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg> );
 
 export default function Home() {
-    // --- State Management ---
-    const [chats, setChats] = useState({}); // Stores all conversations
+    const [chats, setChats] = useState({});
     const [currentChatId, setCurrentChatId] = useState(null);
     const [input, setInput] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const messagesEndRef = useRef(null);
 
-    // --- Data Persistence ---
     useEffect(() => {
         const savedChats = JSON.parse(localStorage.getItem("myaibrain_chats") || "{}");
         setChats(savedChats);
@@ -29,9 +27,8 @@ export default function Home() {
             localStorage.setItem("myaibrain_chats", JSON.stringify(chats));
         }
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, [chats]);
+    }, [chats, currentChatId]); // Rerun effect when currentChatId changes
 
-    // --- Core Functions ---
     const handleNewChat = () => {
         const newChatId = `chat_${Date.now()}`;
         const newChat = {
@@ -39,44 +36,28 @@ export default function Home() {
             title: "New Note",
             messages: [{ role: 'assistant', content: 'System Online. How can I help you process reality today?' }]
         };
-        setChats(prev => ({ ...prev, [newChatId]: newChat }));
+        // Use a functional update to prevent race conditions
+        setChats(prev => ({ [newChatId]: newChat, ...prev }));
         setCurrentChatId(newChatId);
     };
     
     const handleSendMessage = async () => {
         if (!input.trim() || isLoading || !currentChatId) return;
-
         const userMessage = { role: 'user', content: input };
         const updatedMessages = [...chats[currentChatId].messages, userMessage];
-        
-        setChats(prev => ({
-            ...prev,
-            [currentChatId]: { ...prev[currentChatId], messages: updatedMessages }
-        }));
+        setChats(prev => ({ ...prev, [currentChatId]: { ...prev[currentChatId], messages: updatedMessages } }));
         setInput("");
         setIsLoading(true);
 
         try {
-            // In a real app, you'd send the relevant history, not necessarily all of it.
-            const response = await fetch('/api/chat', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ messages: updatedMessages }),
-            });
-
+            const response = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: updatedMessages }) });
             if (!response.ok) throw new Error("Failed to connect to the AI brain.");
             const data = await response.json();
             const aiMessage = { role: 'assistant', content: data.reply };
-            setChats(prev => ({
-                ...prev,
-                [currentChatId]: { ...prev[currentChatId], messages: [...updatedMessages, aiMessage] }
-            }));
+            setChats(prev => ({ ...prev, [currentChatId]: { ...prev[currentChatId], messages: [...updatedMessages, aiMessage] } }));
         } catch (error) {
             const errorMessage = { role: 'assistant', content: `Error: ${error.message}` };
-            setChats(prev => ({
-                ...prev,
-                [currentChatId]: { ...prev[currentChatId], messages: [...updatedMessages, errorMessage] }
-            }));
+            setChats(prev => ({ ...prev, [currentChatId]: { ...prev[currentChatId], messages: [...updatedMessages, errorMessage] } }));
         } finally {
             setIsLoading(false);
         }
@@ -88,14 +69,13 @@ export default function Home() {
 
     return (
         <div className="flex h-screen bg-gray-900 text-white font-sans">
-            {/* Sidebar */}
             <aside className="w-64 bg-black p-4 flex flex-col">
                 <button onClick={handleNewChat} className="w-full text-left p-3 mb-4 rounded-lg border border-gray-700 hover:bg-gray-800 text-sm flex items-center gap-2">
                     <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 4V20M20 12H4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
                     New Note
                 </button>
                 <div className="flex-1 overflow-y-auto space-y-2">
-                    {Object.values(chats).reverse().map(chat => (
+                    {Object.values(chats).map(chat => (
                         <div key={chat.id} onClick={() => setCurrentChatId(chat.id)}
                             className={`p-2 text-gray-300 text-sm rounded-lg truncate cursor-pointer ${currentChatId === chat.id ? 'bg-gray-800' : 'hover:bg-gray-800'}`}>
                             {chat.title}
@@ -110,7 +90,6 @@ export default function Home() {
                 </div>
             </aside>
 
-            {/* Main Chat Area */}
             <main className="flex-1 flex flex-col bg-gray-800">
                 <div className="flex-1 overflow-y-auto p-6">
                     <div className="space-y-6">
@@ -124,7 +103,15 @@ export default function Home() {
                                 </div>
                             </div>
                         ))}
-                        {isLoading && ( /* ... existing loading indicator ... */ )}
+                        {/* --- THE FIX IS HERE --- */}
+                        {isLoading && (
+                             <div className="flex items-start gap-4">
+                                <div className="p-2 rounded-full bg-gray-700"><BrainIcon /></div>
+                                <div className="max-w-xl pt-1">
+                                    <span className="animate-pulse">...</span>
+                                </div>
+                            </div>
+                        )}
                         <div ref={messagesEndRef} />
                     </div>
                 </div>
