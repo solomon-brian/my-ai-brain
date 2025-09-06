@@ -5,31 +5,54 @@ const UserIcon = () => ( <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none
 
 export default function Home() {
     const [notes, setNotes] = useState([]);
-    const [messages, setMessages] = useState([]); // Separate state for chat
-    const [input, setInput] useState("");
-    const [mode, setMode] = useState("analysis"); // Default to the chat
+    const [messages, setMessages] = useState([]);
+    // --- THE FIX IS HERE ---
+    const [input, setInput] = useState("");
+    const [mode, setMode] = useState("analysis");
     const [isLoading, setIsLoading] = useState(false);
     const [theme, setTheme] = useState("light");
     const messagesEndRef = useRef(null);
 
     // --- Core Logic ---
-    useEffect(() => { /* theme logic */ }, []);
-    const toggleTheme = () => { /* theme logic */ };
-    useEffect(() => { /* load notes */ }, []);
-    useEffect(() => { /* save notes */ }, [notes]);
+    useEffect(() => {
+        const savedTheme = localStorage.getItem("myaibrain_theme") || "light";
+        setTheme(savedTheme);
+        document.body.classList.toggle("dark-mode", savedTheme === "dark");
+    }, []);
+
+    const toggleTheme = () => {
+        const newTheme = theme === "light" ? "dark" : "light";
+        setTheme(newTheme);
+        localStorage.setItem("myaibrain_theme", newTheme);
+        document.body.classList.toggle("dark-mode", newTheme === "dark");
+    };
+
+    useEffect(() => {
+        const savedNotes = JSON.parse(localStorage.getItem("myaibrain_notes") || "[]");
+        setNotes(savedNotes);
+        const initialMessages = [{ role: 'assistant', content: 'System Online. Welcome to your AI Brain.' }];
+        setMessages(initialMessages);
+    }, []);
+
+    useEffect(() => { localStorage.setItem("myaibrain_notes", JSON.stringify(notes)); }, [notes]);
     useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [messages]);
 
-    const addNote = () => { if (!input.trim()) return; setNotes(prev => [...prev, { text: input, date: new Date().toISOString() }]); setInput(""); };
+    const addNote = () => {
+        if (!input.trim()) return;
+        setNotes(prev => [...prev, { text: input, date: new Date().toISOString() }]);
+        setInput("");
+    };
     
     const handleSendMessage = async () => {
         if (!input.trim() || isLoading) return;
         const userMessage = { role: 'user', content: input };
         setMessages(prev => [...prev, userMessage]);
+        const currentInput = input;
         setInput("");
         setIsLoading(true);
 
         const context = notes.map(n => n.text).join("\n");
-        const prompt = `Context:\n${context}\n\nQuestion: ${input}`;
+        const prompt = `Context:\n${context}\n\nQuestion: ${currentInput}`;
         
         try {
             const response = await fetch('/api/groq', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prompt }) });
@@ -44,7 +67,6 @@ export default function Home() {
         }
     };
     
-    // --- UI Structure ---
     return (
         <div className="flex flex-col h-screen font-sans antialiased">
             <header className="fixed top-0 left-0 right-0 z-10 backdrop-blur-sm" style={{ backgroundColor: 'var(--header-bg)' }}>
@@ -54,46 +76,43 @@ export default function Home() {
                         <h1 className="text-xl font-bold" style={{ color: 'var(--text-main)' }}>My AI Brain</h1>
                     </div>
                     <nav className="flex items-center gap-2">
-                        <button onClick={() => setMode('notes')} className={`px-4 py-2 rounded-lg text-sm font-semibold ${mode === 'notes' ? 'bg-gray-200 dark:bg-gray-700' : 'text-gray-500 dark:text-gray-400'}`}>Notes</button>
-                        <button onClick={() => setMode('analysis')} className={`px-4 py-2 rounded-lg text-sm font-semibold ${mode === 'analysis' ? 'bg-gray-200 dark:bg-gray-700' : 'text-gray-500 dark:text-gray-400'}`}>Analysis</button>
+                        <button onClick={() => setMode('notes')} className={`px-4 py-2 rounded-lg text-sm font-semibold ${mode === 'notes' ? 'bg-gray-200 dark:bg-gray-700' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'}`}>Notes</button>
+                        <button onClick={() => setMode('analysis')} className={`px-4 py-2 rounded-lg text-sm font-semibold ${mode === 'analysis' ? 'bg-gray-200 dark:bg-gray-700' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'}`}>Analysis</button>
                         <button className="px-3 py-2 rounded-lg text-sm font-semibold" style={{ color: 'var(--text-dim)', backgroundColor: 'var(--surface-bg)' }} onClick={toggleTheme}>{theme === 'light' ? 'Dark' : 'Light'}</button>
                     </nav>
                 </div>
             </header>
 
             <main className="flex-1 pt-[81px] overflow-hidden">
-                {/* Notes View */}
-                <div className={`w-full h-full p-6 transition-transform duration-300 ease-in-out ${mode === 'notes' ? 'translate-x-0' : '-translate-x-full'}`}>
-                    <h2 className="text-2xl font-bold mb-4">Notes Log</h2>
-                    <textarea className="w-full h-40 p-3 rounded-lg border" style={{backgroundColor: 'var(--surface-bg)', borderColor: 'var(--border-color)'}} placeholder="Capture a new note..." value={input} onChange={e => setInput(e.target.value)}></textarea>
+                {/* Unified Input - visible in both modes, but function changes */}
+                <div className={`w-full h-full p-6 ${mode === 'notes' ? 'block' : 'hidden'}`}>
+                    <h2 className="text-2xl font-bold mb-4" style={{color: 'var(--text-main)'}}>Notes Log</h2>
+                    <textarea className="w-full h-40 p-3 rounded-lg border text-base" style={{backgroundColor: 'var(--surface-bg)', borderColor: 'var(--border-color)', color: 'var(--text-main)'}} placeholder="Capture a new note..." value={input} onChange={e => setInput(e.target.value)}></textarea>
                     <button onClick={addNote} className="px-5 py-2 mt-2 rounded-lg bg-blue-600 text-white font-semibold">Save Note</button>
                     <div className="mt-6 space-y-2 overflow-y-auto h-[calc(100%-250px)]">
-                        {notes.slice().reverse().map((n, i) => <div key={i} className="p-3 rounded-lg" style={{backgroundColor: 'var(--surface-bg)'}}>{n.text}</div>)}
+                        {notes.slice().reverse().map((n, i) => <div key={i} className="p-3 rounded-lg" style={{backgroundColor: 'var(--surface-bg)', color: 'var(--text-dim)'}}>{n.text}</div>)}
                     </div>
                 </div>
 
-                {/* Analysis (Chat) View */}
-                <div className={`w-full h-full p-6 transition-transform duration-300 ease-in-out absolute top-0 left-0 pt-[81px] ${mode === 'analysis' ? 'translate-x-0' : 'translate-x-full'}`}>
-                    <div className="max-w-3xl mx-auto h-full flex flex-col">
-                        <div className="flex-1 overflow-y-auto space-y-6 pr-4">
-                            {messages.map((msg, i) => (
-                                <div key={i} className="flex items-start gap-4">
-                                    <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${msg.role === 'user' ? 'bg-blue-600' : ''}`} style={{backgroundColor: msg.role === 'assistant' ? 'var(--bot-bubble-bg)' : ''}}>
-                                        {msg.role === 'user' ? <UserIcon /> : <BrainIcon />}
-                                    </div>
-                                    <div className="p-3 rounded-lg" style={{backgroundColor: msg.role === 'user' ? 'var(--user-bubble-bg)' : 'var(--bot-bubble-bg)', color: msg.role === 'user' ? '#fff' : 'var(--text-main)'}}>
-                                        {msg.content}
-                                    </div>
+                <div className={`w-full h-full ${mode === 'analysis' ? 'flex flex-col' : 'hidden'}`}>
+                     <div className="flex-1 overflow-y-auto space-y-6 pr-4 p-6">
+                        {messages.map((msg, i) => (
+                            <div key={i} className={`flex items-start gap-4 max-w-3xl mx-auto`}>
+                                <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${msg.role === 'user' ? 'bg-blue-600' : ''}`} style={{backgroundColor: msg.role === 'assistant' ? 'var(--bot-bubble-bg)' : ''}}>
+                                    {msg.role === 'user' ? <UserIcon /> : <BrainIcon />}
                                 </div>
-                            ))}
-                            {isLoading && <p>...</p>}
-                            <div ref={messagesEndRef}></div>
-                        </div>
-                        <div className="py-4">
-                            <div className="relative">
-                                <textarea className="w-full p-4 pr-16 rounded-xl border" style={{backgroundColor: 'var(--surface-bg)', borderColor: 'var(--border-color)'}} placeholder="Ask your brain..." value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => {if(e.key === 'Enter' && !e.shiftKey) {e.preventDefault(); handleSendMessage();}}}></textarea>
-                                <button onClick={handleSendMessage} className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-lg bg-blue-600 text-white">Send</button>
+                                <div className="p-3 rounded-lg" style={{backgroundColor: msg.role === 'user' ? 'var(--user-bubble-bg)' : 'var(--bot-bubble-bg)', color: msg.role === 'user' ? (theme === 'dark' ? '#fff' : '#fff') : 'var(--text-main)'}}>
+                                    {msg.content}
+                                </div>
                             </div>
+                        ))}
+                        {isLoading && <p className="text-center" style={{color: 'var(--text-dim)'}}>...</p>}
+                        <div ref={messagesEndRef}></div>
+                    </div>
+                    <div className="py-4 px-6">
+                        <div className="relative max-w-3xl mx-auto">
+                            <textarea className="w-full p-4 pr-16 rounded-xl border" style={{backgroundColor: 'var(--surface-bg)', borderColor: 'var(--border-color)', color: 'var(--text-main)'}} placeholder="Ask your brain..." value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => {if(e.key === 'Enter' && !e.shiftKey) {e.preventDefault(); handleSendMessage();}}}></textarea>
+                            <button onClick={handleSendMessage} disabled={isLoading} className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-lg bg-blue-600 text-white disabled:bg-gray-400">Send</button>
                         </div>
                     </div>
                 </div>
